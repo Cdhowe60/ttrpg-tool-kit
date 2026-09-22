@@ -26,7 +26,7 @@ def is_field_header(current_value: str, next_value: str, previous_value: str) ->
         return(False, False, True)
     elif previous_value.isupper() == False and current_value.isupper() and next_value.isupper():
         return(True, False, False)
-    elif previous_value.isupper == False and current_value.isupper() and next_value.isupper() == False:
+    elif previous_value.isupper() == False and current_value.isupper() and next_value.isupper() == False:
         return(True, False, True)
     else:
         return(False,False,False)
@@ -41,25 +41,32 @@ def clean_file_contents(file_contents: str) -> str:
             prev_val = split_file_contents[i-1]
         else:
             prev_val = ""
+        if i == len(split_file_contents):
+            next_val = ""
+        else:
+            next_val = split_file_contents[i +1]
         current_val = split_file_contents[i]
+        header_status: tuple[bool,bool,bool] = is_field_header(current_val, next_val, prev_val)
         print(f"Current Val: {current_val}")
-        next_val = split_file_contents[i +1]
         print(f"Next Val: {next_val}")
+        print(f"Previous Val: {prev_val}")
+        print(f"Is field header result {header_status}")
+        print("-")
 
-        if(is_field_header(current_val, next_val, prev_val)) == (True, False, True):
+        if header_status == (True, False, True):
             output_file_contents.append(current_val + "\n")
-        elif is_field_header(current_val, next_val, prev_val) == (True, False, False):
+        elif header_status == (True, False, False):
             output_file_contents.append(current_val.replace("\n", " "))
-        elif is_field_header(current_val, next_val, prev_val) == (False, True, False):
+        elif header_status == (False, True, False):
             output_file_contents.append(" " + current_val.replace("\n", " "))
-        elif is_field_header(current_val, next_val, prev_val) == (False, False, True):
-            output_file_contents.append(" " + current_val)
+        elif header_status == (False, False, True):
+            output_file_contents.append(" " + current_val + "\n")
         elif(current_val[-1] == "-"):
             print(5)
             output_file_contents.append(current_val.replace("-", ""))
         elif(current_val[0] == "•" and next_val[0] == "•"):
             print(6)
-            continue_bullet_point = False
+            #continue_bullet_point = False
             output_file_contents.append(current_val + "\n")
         elif(current_val[0] == "•" and next_val[0] != "•"):
             print(7)
