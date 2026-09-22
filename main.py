@@ -10,10 +10,11 @@ def main():
     file_contents: str = get_file_text(path_to_file)
     print("String Cleaner\n ----------- \n 1. Automatic\n 2. Interactive\n 3. Exit\n")
     string_cleaner_mode = int(input("Mode Selection: "))
+    cleaned_file_contents: str = ""
     if string_cleaner_mode == 1:
-        cleaned_file_contents: str = clean_file_contents_automatic(file_contents)
+        cleaned_file_contents = clean_file_contents_automatic(file_contents)
     elif string_cleaner_mode == 2:
-        cleaned_file_contents: str = clean_file_contents_interactive(file_contents)
+        cleaned_file_contents = clean_file_contents_interactive(file_contents)
     elif(string_cleaner_mode == 3):
         print("Exiting Now...")
         sys.exit(1)
@@ -43,6 +44,13 @@ def is_field_header(current_value: str, next_value: str, previous_value: str) ->
     else:
         return(False,False,False)
 
+def check_for_hyphen_split(current_val: str) -> str:
+    if current_val.endswith("-"):
+        return current_val.replace("-", "")
+    else:
+        return current_val
+
+
 
 def clean_file_contents_automatic(file_contents: str) -> str:
     split_file_contents: list[str] = file_contents.split("\n")
@@ -58,33 +66,25 @@ def clean_file_contents_automatic(file_contents: str) -> str:
             next_val = split_file_contents[i +1]
         current_val: str = split_file_contents[i]
         header_status: tuple[bool,bool,bool] = is_field_header(current_val, next_val, prev_val)
-        print(f"Current Val: {current_val}")
-        print(f"Next Val: {next_val}")
-        print(f"Previous Val: {prev_val}")
-        print(f"Is field header result {header_status}")
-        print("-")
+        current_val = check_for_hyphen_split(current_val)
+        print(f"Previous:{prev_val}\nCurrent:{current_val}\nNext:{next_val}\nHeader Results:{header_status}\n -------------")
 
         if header_status == (True, False, True):
             output_file_contents.append(current_val + "\n")
         elif header_status == (True, False, False):
-            output_file_contents.append(current_val.replace("\n", " "))
+            output_file_contents.append("\n" + current_val.replace("\n", " "))
         elif header_status == (False, True, False):
             output_file_contents.append(" " + current_val.replace("\n", " "))
         elif header_status == (False, False, True):
             output_file_contents.append(" " + current_val + "\n")
-        elif(current_val[-1] == "-"):
-            output_file_contents.append(current_val.replace("-", ""))
-        elif(current_val[0] == "•" and next_val[0] == "•"):
-            output_file_contents.append(current_val + "\n")
-        elif(current_val[0] == "•" and next_val[0] != "•"):
-            output_file_contents.append(current_val.replace("\n", "") + " ")
         else:
             output_file_contents.append(current_val.replace("\n", " ") + " ")
-    return "".join(output_file_contents)
+    return "".join(output_file_contents).replace("•", "- ")
 
 def clean_file_contents_interactive(file_contents: str) -> str:
     split_file_contents: list[str] = file_contents.split("\n")
     output_file_contents: list[str] = []
+    bullet_point_decision: str = ""
     for i in range(len(split_file_contents) - 1):
         if(i > 0):
             prev_val = split_file_contents[i-1]
@@ -96,28 +96,44 @@ def clean_file_contents_interactive(file_contents: str) -> str:
             next_val = split_file_contents[i +1]
         current_val: str = split_file_contents[i]
         header_status: tuple[bool,bool,bool] = is_field_header(current_val, next_val, prev_val)
-        print(f"Current Val: {current_val}")
-        print(f"Next Val: {next_val}")
-        print(f"Previous Val: {prev_val}")
-        print(f"Is field header result {header_status}")
-        print("-")
+        current_val = check_for_hyphen_split(current_val)
+        print(f"Previous:{prev_val}\nCurrent:{current_val}\nNext:{next_val}\nHeader Results:{header_status}\n -------------")
 
         if header_status == (True, False, True):
             output_file_contents.append(current_val + "\n")
         elif header_status == (True, False, False):
-            output_file_contents.append(current_val.replace("\n", " "))
+            output_file_contents.append("\n" + current_val.replace("\n", " "))
         elif header_status == (False, True, False):
             output_file_contents.append(" " + current_val.replace("\n", " "))
         elif header_status == (False, False, True):
             output_file_contents.append(" " + current_val + "\n")
-        elif(current_val[-1] == "-"):
-            output_file_contents.append(current_val.replace("-", ""))
+        elif current_val.startswith("•") == False and next_val.startswith("•"):
+            output_file_contents.append(current_val + "\n")
+        elif(bullet_point_decision == "C"):
+            bullet_point_decision = input(f"Current line: {current_val}\n Next line: {next_val}\n (N)ew Line/(C)ontinue Line? ").upper()
+            if bullet_point_decision == "N":
+                output_file_contents.append(current_val + "\n")
+            elif bullet_point_decision == "C":
+                output_file_contents.append(current_val.replace("\n", " "))
+            else:
+                print("Invalid option selected. Defaulting to Continue Line.")
+                output_file_contents.append(current_val.replace("\n", " "))
         elif(current_val[0] == "•" and next_val[0] == "•"):
             output_file_contents.append(current_val + "\n")
         elif(current_val[0] == "•" and next_val[0] != "•"):
-            output_file_contents.append(current_val.replace("\n", "") + " ")
+            if next_val == "" or next_val == None:
+                output_file_contents.append(current_val + "\n")
+                continue
+            bullet_point_decision = input(f"Current line: {current_val}\n Next line: {next_val}\n (N)ew Line/(C)ontinue Line? ").upper()
+            if bullet_point_decision == "N":
+                output_file_contents.append(current_val + "\n")
+            elif bullet_point_decision == "C":
+                output_file_contents.append(current_val.replace("\n", " "))
+            else:
+                print("Invalid option selected. Defaulting to Continue Line.")
+                output_file_contents.append(current_val.replace("\n", " "))
         else:
             output_file_contents.append(current_val.replace("\n", " ") + " ")
-    return "".join(output_file_contents)
+    return "".join(output_file_contents).replace("•", "- ")
 
 main()
