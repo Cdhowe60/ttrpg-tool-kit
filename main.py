@@ -7,6 +7,7 @@ def main():
     path_to_file: str = sys.argv[1]
     file_contents: str = get_file_text(path_to_file)
     cleaned_file_contents: str = clean_file_contents(file_contents)
+    print("---------------------------------------")
     print(cleaned_file_contents)
 
 def get_file_text(path_to_file: str) -> str:
